@@ -1,6 +1,7 @@
 ﻿using Finance.API.Application.Requests;
 using Finance.API.Application.Services;
 using Finance.API.Domain.Enums;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Finance.API.Controllers
@@ -10,9 +11,13 @@ namespace Finance.API.Controllers
     public class TransactionController(ITransactionService transactionService) : ControllerBase
     {
         private readonly ITransactionService _transactionService = transactionService;
+       
+        
+
         [HttpPost]
-        public async Task<IActionResult> AddTransaction([FromBody]AddTransactionRequest request)
+        public async Task<IActionResult> AddTransaction([FromBody]AddTransactionRequest request, [FromServices]IValidator<AddTransactionRequest> validator)
         {
+            request.Validate(validator);
             var response = await _transactionService.AddTransaction(request);
             return Created("",response);
         }
@@ -20,6 +25,7 @@ namespace Finance.API.Controllers
         public async Task<IActionResult> GetTransactions()
         {
             var request = new AddTransactionRequest {UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6") };
+          
             var response = await _transactionService.GetTransactions(request);
 
             return Ok(response);
