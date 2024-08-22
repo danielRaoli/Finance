@@ -17,13 +17,20 @@ namespace Finance.API.Application.Services
 
         }
 
+        public async Task<Response<TransactionResponse?>> DeleteTransaction(DeleteTransactionRequest request)
+        {
+            var result = await _transactionRepository.DeleteTransaction(request);
+
+            return result ? new Response<TransactionResponse?>(null, 204, "Transaction Remove with success") : new Response<TransactionResponse?>(null, 401, "transaction could not be removed, try again");
+        }
+
         public async Task<Response<List<TransactionResponse>>> GetAllByType(GetTransactionByType request)
         {
             var transactions = await _transactionRepository.GetAllByType(request);
             var responseTransactions = transactions.Select(t => TransactionResponse.FromEntity(t)).ToList();
 
             return new Response<List<TransactionResponse>>(responseTransactions, 200);
-            
+
         }
 
         public async Task<Response<List<TransactionResponse>>> GetAllGreaterThan(GetTransactionsGreaterThan request)
@@ -40,6 +47,13 @@ namespace Finance.API.Application.Services
             var listResponseTransactions = transactionsDb.Select(t => TransactionResponse.FromEntity(t)).ToList();
 
             return new Response<List<TransactionResponse>>(listResponseTransactions, 200);
+        }
+
+        public async Task<Response<TransactionResponse?>> UpdateTransaction(UpdateTransactionRequest request)
+        {
+            var result = await _transactionRepository.UpdateTransaction(request);
+
+            return result is true ? new Response<TransactionResponse?>(null, 204, "Transaction updated with succes") : new Response<TransactionResponse?>(null, 401, "transaction could not be updated, try again ");
         }
     }
 }

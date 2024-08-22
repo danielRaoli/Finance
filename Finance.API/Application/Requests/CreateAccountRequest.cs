@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Finance.API.Application.Requests
 {
-    public class CreateAccountRequest 
+    public class CreateAccountRequest
     {
         public string Email { get; set; }
         public string UserName { get; set; }
@@ -17,7 +17,7 @@ namespace Finance.API.Application.Requests
         {
             var result = validator.Validate(this);
 
-            if(result.IsValid is false)
+            if (result.IsValid is false)
             {
                 var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
 

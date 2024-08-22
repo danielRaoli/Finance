@@ -2,7 +2,7 @@
 
 namespace Finance.API.Domain.Entities
 {
-    public class Transaction(Guid userId, decimal value, TransactionType transactionType, DateTime date, string description)
+    public class Transaction(Guid userId, decimal value, TransactionType transactionType, string description)
     {
 
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -10,6 +10,6 @@ namespace Finance.API.Domain.Entities
         public string Description { get; set; } = description;
         public decimal Value { get; set; } = value;
         public TransactionType TransactionType { get; set; } = transactionType;
-        public DateTime Date { get; set; } = date;
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

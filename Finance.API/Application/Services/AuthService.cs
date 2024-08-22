@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Finance.API.Application.Services
 {
-    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager) : IAuthService
+    public class AuthService(UserManager<User> userManager, ITokenService tokenService) : IAuthService
     {
         private readonly UserManager<User> _userManager = userManager;
-        private readonly SignInManager<User> _signManager = signInManager;
-        private readonly ITokenService _tokenService;
+        private readonly ITokenService _tokenService = tokenService;
         public async Task CreateAccount(CreateAccountRequest request)
         {
             var user = new User { UserName = request.UserName, Email = request.Email };
@@ -30,15 +29,17 @@ namespace Finance.API.Application.Services
 
             }
 
-            var result = await _signManager.PasswordSignInAsync(request.UserName, request.Password, false, false);
 
-            return result.Succeeded ? _tokenService.GenerateToken(user) : throw new UnauthorizedAccessException(Resource.NOT_REGISTER); ;
+            var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+
+           
+            return passwordValid ? _tokenService.GenerateToken(user) : throw new UnauthorizedAccessException(Resource.NOT_REGISTER); ;
 
         }
 
-        public Task Logout()
+        public async Task Logout()
         {
-            throw new NotImplementedException();
+           throw new NotImplementedException();
         }
     }
 }

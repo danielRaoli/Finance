@@ -21,14 +21,19 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("connection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-
+builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddRoles<IdentityRole<Guid>>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddUserManager<UserManager<User>>()// Adicione o SignInManager manualmente
+.AddDefaultTokenProviders();
 
 builder.Services.AddValidatorsFromAssemblyContaining<AddTransactionValidator>();
 builder.Services.AddTransient<IValidator<AddTransactionRequest>, AddTransactionValidator>();
 
-builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 builder.Services.AddMvc(options => options.Filters.Add(typeof(ExceptionFilter)));
@@ -37,17 +42,24 @@ builder.Services.AddMvc(options => options.Filters.Add(typeof(ExceptionFilter)))
 builder.Services.AddControllers();
 
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+
+builder.Services.AddAuthentication(options =>
 {
-    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer= false,
-        ValidateAudience= false,
+        ValidateIssuer = false,
+        ValidateAudience = false,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("DHSAIOHDIOSAHDSA*()#*$)(#Q*$)(#*$(#@$#@!!!EQEWDS")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("#@#@!323@$#@$^%$&^&5DSfds!!$#$AC!!XZ!!C#$#@FDSADE#")),
         ClockSkew = TimeSpan.Zero
     };
 });
+
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -71,7 +83,19 @@ builder.Services.AddSwaggerGen(c =>
 
 );
 
+builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy("AppCors", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Permite a origem específica do frontend
+              .AllowAnyHeader()                     // Permite qualquer cabeçalho
+              .AllowAnyMethod()        // Permite qualquer método (GET, POST, etc.)                
+              .AllowCredentials(); //Permite o envio de credenciais (cookies, tokens, etc.)
+    });
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -81,9 +105,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AppCors");
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
