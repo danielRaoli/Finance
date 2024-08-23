@@ -18,7 +18,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("connection");
+var connectionString = builder.Configuration["connection"];
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders().AddRoles<IdentityRole<Guid>>()
@@ -54,7 +54,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("#@#@!323@$#@$^%$&^&5DSfds!!$#$AC!!XZ!!C#$#@FDSADE#")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["issuerkey"]!)),
         ClockSkew = TimeSpan.Zero
     };
 });
@@ -87,22 +87,18 @@ builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("AppCors", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Permite a origem específica do frontend
-              .AllowAnyHeader()                     // Permite qualquer cabeçalho
-              .AllowAnyMethod()        // Permite qualquer método (GET, POST, etc.)                
-              .AllowCredentials(); //Permite o envio de credenciais (cookies, tokens, etc.)
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 app.UseCors("AppCors");

@@ -10,11 +10,16 @@ namespace Finance.API.Application.Services
 {
     public class TokenService : ITokenService
     {
-        public string SecurityKey { get; private set; } = "#@#@!323@$#@$^%$&^&5DSfds!!$#$AC!!XZ!!C#$#@FDSADE#";
+        private readonly IConfiguration _configuration;
+
+        public TokenService(IConfiguration configuration)
+        {
+            _configuration = configuration; 
+        }
         public string GenerateToken(User user)
         {
 
-            var encodingKey = Encoding.ASCII.GetBytes(SecurityKey);
+            var encodingKey = Encoding.ASCII.GetBytes(_configuration["issuerkey"]!);
 
             var claims = new ClaimsIdentity(
             [

@@ -8,6 +8,6 @@ namespace Finance.API.Application.Services
 
         Task CreateAccount(CreateAccountRequest request);
 
-        Task Logout();
+        
     }
 }

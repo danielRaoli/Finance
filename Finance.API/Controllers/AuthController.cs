@@ -30,13 +30,6 @@ namespace Finance.API.Controllers
             return Ok(new Response<string>(token, 200));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Logout()
-        {
-            await _authService.Logout();
-
-            return Ok(new Response<string>(null, 204, "logout"));
-        }
 
     }
 }

@@ -22,24 +22,16 @@ namespace Finance.API.Application.Services
 
         public async Task<string> Login(LoginModelRequest request)
         {
-            var user = await _userManager.FindByNameAsync(request.UserName);
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException(Resource.NOT_REGISTER);
-
-            }
+            var user = await _userManager.FindByNameAsync(request.UserName) ?? throw new UnauthorizeException(Resource.NOT_REGISTER);
+            ;
 
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
 
            
-            return passwordValid ? _tokenService.GenerateToken(user) : throw new UnauthorizedAccessException(Resource.NOT_REGISTER); ;
+            return passwordValid ? _tokenService.GenerateToken(user) : throw new UnauthorizeException(Resource.NOT_REGISTER); ;
 
         }
 
-        public async Task Logout()
-        {
-           throw new NotImplementedException();
-        }
     }
 }
